@@ -15,7 +15,6 @@ import {
   UserPlus,
   Award,
   BarChart3,
-  Settings,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -43,7 +42,6 @@ const navigation = [
   { name: 'Enrollments', href: '/enrollments', icon: UserPlus },
   { name: 'Certificates', href: '/certificates', icon: Award },
   { name: 'Statistics', href: '/statistics', icon: BarChart3 },
-  { name: 'Settings', href: '/settings', icon: Settings, roles: ['SUPER_ADMIN'] },
 ];
 
 export function Sidebar() {
@@ -51,12 +49,7 @@ export function Sidebar() {
   const { isCollapsed, toggleSidebar } = useSidebarStore();
   const { user, logout } = useAuthStore();
 
-  const filteredNavigation = navigation.filter((item) => {
-    if (item.roles && user) {
-      return item.roles.includes(user.role);
-    }
-    return true;
-  });
+  const filteredNavigation = navigation;
 
   return (
     <aside
@@ -143,11 +136,6 @@ export function Sidebar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />

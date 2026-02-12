@@ -18,12 +18,12 @@ import {
 } from 'recharts';
 
 const monthlyData = [
-  { month: 'Jan', users: 120, formations: 15, enrollments: 85, revenue: 12500 },
-  { month: 'Feb', users: 150, formations: 18, enrollments: 110, revenue: 16500 },
-  { month: 'Mar', users: 180, formations: 22, enrollments: 145, revenue: 21000 },
-  { month: 'Apr', users: 220, formations: 25, enrollments: 180, revenue: 27500 },
-  { month: 'May', users: 280, formations: 30, enrollments: 230, revenue: 35000 },
-  { month: 'Jun', users: 350, formations: 35, enrollments: 300, revenue: 45000 },
+  { month: 'Jan', users: 120, formations: 15, enrollments: 85 },
+  { month: 'Feb', users: 150, formations: 18, enrollments: 110 },
+  { month: 'Mar', users: 180, formations: 22, enrollments: 145 },
+  { month: 'Apr', users: 220, formations: 25, enrollments: 180 },
+  { month: 'May', users: 280, formations: 30, enrollments: 230 },
+  { month: 'Jun', users: 350, formations: 35, enrollments: 300 },
 ];
 
 const categoryData = [
@@ -41,7 +41,6 @@ const completionData = [
 ];
 
 const stats = [
-  { title: 'Total Revenue', value: '$157,500', change: '+25%', trend: 'up' },
   { title: 'Active Users', value: '350', change: '+18%', trend: 'up' },
   { title: 'Completion Rate', value: '85%', change: '+5%', trend: 'up' },
   { title: 'Avg. Course Rating', value: '4.8', change: '+0.2', trend: 'up' },
@@ -105,7 +104,7 @@ export default function StatisticsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Revenue Trend</CardTitle>
+            <CardTitle>Monthly Enrollments</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -121,7 +120,7 @@ export default function StatisticsPage() {
                       borderRadius: '8px',
                     }}
                   />
-                  <Bar dataKey="revenue" fill="#0088FE" name="Revenue ($)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="enrollments" fill="#00C49F" name="Enrollments" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
