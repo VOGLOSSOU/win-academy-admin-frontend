@@ -124,7 +124,7 @@ win-academy-admin-frontend/
 
 ```bash
 # Cloner le projet
-git clone <repository-url>
+git clone https://github.com/VOGLOSSOU/win-academy-admin-frontend
 cd win-academy-admin-frontend
 
 # Installer les dépendances
