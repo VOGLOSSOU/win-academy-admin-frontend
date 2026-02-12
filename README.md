@@ -1,8 +1,8 @@
-# Nathan VOGLOSSOU Admin Panel
+# Win Academy Admin Panel
 
 ## Description
 
-Nathan VOGLOSSOU Admin est le backoffice de gestion de la plateforme Nathan VOGLOSSOU, une plateforme EdTech béninoise de formation en ligne dédiée à la maîtrise du digital, pensée spécifiquement pour les réalités locales, notamment les zones à faible débit internet.
+Win Academy Admin est le backoffice de gestion de la plateforme Nathan VOGLOSSOU, une plateforme EdTech béninoise de formation en ligne dédiée à la maîtrise du digital, pensée spécifiquement pour les réalités locales, notamment les zones à faible débit internet.
 
 Cette application admin permet aux administrateurs (ADMIN et SUPER_ADMIN) de gérer l'ensemble du système académique, les utilisateurs, les formations, les évaluations et les certificats.
 
