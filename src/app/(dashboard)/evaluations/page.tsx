@@ -58,7 +58,7 @@ export default function EvaluationsPage() {
   const [isAddingQuestions, setIsAddingQuestions] = useState(false);
 
   const filteredEvaluations = evaluations.filter((item) =>
-    eval.title.toLowerCase().includes(searchQuery.toLowerCase())
+    item.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleDelete = (id: string) => {
