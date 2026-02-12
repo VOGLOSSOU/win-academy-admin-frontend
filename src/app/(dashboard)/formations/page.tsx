@@ -46,12 +46,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
 const formationSchema = z.object({
-  title: z.string().min(2, 'Title must be at least 2 characters'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  categoryId: z.string().min(1, 'Select a category'),
-  price: z.number().min(0, 'Price must be positive'),
-  duration: z.number().min(1, 'Duration must be at least 1 hour'),
-  maxStudents: z.number().min(1, 'Max students must be at least 1'),
+  title: z.string().min(2, 'Le titre doit contenir au moins 2 caracteres'),
+  description: z.string().min(10, 'La description doit contenir au moins 10 caracteres'),
+  categoryId: z.string().min(1, 'Selectionner une categorie'),
+  duration: z.number().min(1, 'La duree doit etre d au moins 1 heure'),
 });
 
 type FormationFormValues = z.infer<typeof formationSchema>;
@@ -62,20 +60,18 @@ interface Formation {
   description: string;
   categoryId: string;
   categoryName: string;
-  price: number;
   duration: number;
-  maxStudents: number;
   isPublished: boolean;
 }
 
 const mockFormations: Formation[] = [
-  { id: '1', title: 'Web Development', description: 'Complete web development course', categoryId: '1', categoryName: 'Programming', price: 299, duration: 40, maxStudents: 30, isPublished: true },
-  { id: '2', title: 'UI/UX Design', description: 'Learn UI/UX design principles', categoryId: '2', categoryName: 'Design', price: 249, duration: 30, maxStudents: 25, isPublished: true },
-  { id: '3', title: 'Digital Marketing', description: 'Master digital marketing', categoryId: '3', categoryName: 'Marketing', price: 199, duration: 20, maxStudents: 40, isPublished: false },
+  { id: '1', title: 'Developpement Web', description: 'Cours complet de developpement web', categoryId: '1', categoryName: 'Programmation', duration: 40, isPublished: true },
+  { id: '2', title: 'Design UI/UX', description: 'Apprendre les principes du design UI/UX', categoryId: '2', categoryName: 'Design', duration: 30, isPublished: true },
+  { id: '3', title: 'Marketing Digital', description: 'Maitriser le marketing digital', categoryId: '3', categoryName: 'Marketing', duration: 20, isPublished: false },
 ];
 
 const categories = [
-  { id: '1', name: 'Programming' },
+  { id: '1', name: 'Programmation' },
   { id: '2', name: 'Design' },
   { id: '3', name: 'Marketing' },
 ];
@@ -89,9 +85,7 @@ export default function FormationsPage() {
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormationFormValues>({
     resolver: zodResolver(formationSchema),
     defaultValues: {
-      price: 0,
       duration: 0,
-      maxStudents: 0,
     },
   });
 
@@ -105,7 +99,7 @@ export default function FormationsPage() {
       setFormations((prev) =>
         prev.map((f) => f.id === editingFormation.id ? { ...f, ...data, categoryName: category?.name || '' } : f)
       );
-      toast.success('Formation updated successfully');
+      toast.success('Formation modifiee avec succes');
     } else {
       const newFormation: Formation = {
         id: Date.now().toString(),
@@ -114,7 +108,7 @@ export default function FormationsPage() {
         isPublished: false,
       };
       setFormations((prev) => [...prev, newFormation]);
-      toast.success('Formation created successfully');
+      toast.success('Formation creee avec succes');
     }
     reset();
     setEditingFormation(null);
@@ -126,15 +120,13 @@ export default function FormationsPage() {
     setValue('title', formation.title);
     setValue('description', formation.description);
     setValue('categoryId', formation.categoryId);
-    setValue('price', formation.price);
     setValue('duration', formation.duration);
-    setValue('maxStudents', formation.maxStudents);
     setIsDialogOpen(true);
   };
 
   const handleDelete = (id: string) => {
     setFormations((prev) => prev.filter((f) => f.id !== id));
-    toast.success('Formation deleted successfully');
+    toast.success('Formation supprimee avec succes');
   };
 
   return (
@@ -142,24 +134,24 @@ export default function FormationsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Formations</h1>
-          <p className="text-muted-foreground">Manage formations with modules and contents</p>
+          <p className="text-muted-foreground">Gerer les formations avec leurs modules et contenus</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => { setEditingFormation(null); reset(); }}>
-              <Plus className="mr-2 h-4 w-4" /> Add Formation
+              <Plus className="mr-2 h-4 w-4" /> Ajouter une formation
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{editingFormation ? 'Edit Formation' : 'Create Formation'}</DialogTitle>
+              <DialogTitle>{editingFormation ? 'Modifier la formation' : 'Creer une formation'}</DialogTitle>
               <DialogDescription>
-                {editingFormation ? 'Update formation information' : 'Fill in the details to create a new formation'}
+                {editingFormation ? 'Mettre a jour les informations de la formation' : 'Remplir les details pour creer une nouvelle formation'}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
+                <Label htmlFor="title">Titre</Label>
                 <Input id="title" {...register('title')} />
                 {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
               </div>
@@ -170,10 +162,10 @@ export default function FormationsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="categoryId">Category</Label>
+                  <Label htmlFor="categoryId">Categorie</Label>
                   <Select onValueChange={(value) => setValue('categoryId', value)} defaultValue={editingFormation?.categoryId}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder="Selectionner une categorie" />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((cat) => (
@@ -183,23 +175,13 @@ export default function FormationsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price ($)</Label>
-                  <Input id="price" type="number" {...register('price', { valueAsNumber: true })} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="duration">Duration (hours)</Label>
+                  <Label htmlFor="duration">Duree (heures)</Label>
                   <Input id="duration" type="number" {...register('duration', { valueAsNumber: true })} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="maxStudents">Max Students</Label>
-                  <Input id="maxStudents" type="number" {...register('maxStudents', { valueAsNumber: true })} />
                 </div>
               </div>
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                <Button type="submit">{editingFormation ? 'Update' : 'Create'}</Button>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
+                <Button type="submit">{editingFormation ? 'Modifier' : 'Creer'}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -210,16 +192,15 @@ export default function FormationsPage() {
         <CardContent className="pt-6">
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search formations..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <Input placeholder="Rechercher des formations..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Titre</TableHead>
+                <TableHead>Categorie</TableHead>
+                <TableHead>Duree</TableHead>
+                <TableHead>Statut</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -228,11 +209,10 @@ export default function FormationsPage() {
                 <TableRow key={formation.id}>
                   <TableCell className="font-medium">{formation.title}</TableCell>
                   <TableCell>{formation.categoryName}</TableCell>
-                  <TableCell>${formation.price}</TableCell>
                   <TableCell>{formation.duration}h</TableCell>
                   <TableCell>
                     <Badge variant={formation.isPublished ? 'default' : 'secondary'}>
-                      {formation.isPublished ? 'Published' : 'Draft'}
+                      {formation.isPublished ? 'Publie' : 'Brouillon'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -243,9 +223,9 @@ export default function FormationsPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>View Modules</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(formation)}>Edit</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(formation.id)} className="text-destructive">Delete</DropdownMenuItem>
+                        <DropdownMenuItem>Voir les modules</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEdit(formation)}>Modifier</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDelete(formation.id)} className="text-destructive">Supprimer</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

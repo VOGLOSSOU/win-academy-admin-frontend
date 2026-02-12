@@ -19,42 +19,41 @@ import {
 
 const monthlyData = [
   { month: 'Jan', users: 120, formations: 15, enrollments: 85 },
-  { month: 'Feb', users: 150, formations: 18, enrollments: 110 },
+  { month: 'Fev', users: 150, formations: 18, enrollments: 110 },
   { month: 'Mar', users: 180, formations: 22, enrollments: 145 },
-  { month: 'Apr', users: 220, formations: 25, enrollments: 180 },
-  { month: 'May', users: 280, formations: 30, enrollments: 230 },
-  { month: 'Jun', users: 350, formations: 35, enrollments: 300 },
+  { month: 'Avr', users: 220, formations: 25, enrollments: 180 },
+  { month: 'Mai', users: 280, formations: 30, enrollments: 230 },
+  { month: 'Juin', users: 350, formations: 35, enrollments: 300 },
 ];
 
 const categoryData = [
-  { name: 'Programming', value: 45, color: '#0088FE' },
+  { name: 'Programmation', value: 45, color: '#0088FE' },
   { name: 'Design', value: 25, color: '#00C49F' },
   { name: 'Marketing', value: 20, color: '#FFBB28' },
   { name: 'Business', value: 10, color: '#FF8042' },
 ];
 
 const completionData = [
-  { rate: 85, label: 'Overall Completion' },
-  { rate: 72, label: 'Course Completion' },
-  { rate: 68, label: 'Quiz Pass Rate' },
-  { rate: 92, label: 'Certificate Rate' },
+  { rate: 85, label: 'Completion globale' },
+  { rate: 72, label: 'Completion des cours' },
+  { rate: 68, label: 'Taux de reussite aux quiz' },
+  { rate: 92, label: 'Taux de certification' },
 ];
 
 const stats = [
-  { title: 'Active Users', value: '350', change: '+18%', trend: 'up' },
-  { title: 'Completion Rate', value: '85%', change: '+5%', trend: 'up' },
-  { title: 'Avg. Course Rating', value: '4.8', change: '+0.2', trend: 'up' },
+  { title: 'Utilisateurs actifs', value: '350', change: '+18%', trend: 'up' },
+  { title: 'Taux de completion', value: '85%', change: '+5%', trend: 'up' },
+  { title: 'Note moyenne des cours', value: '4.8', change: '+0.2', trend: 'up' },
 ];
 
 export default function StatisticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Statistics</h1>
-        <p className="text-muted-foreground">Detailed analytics and performance metrics</p>
+        <h1 className="text-3xl font-bold">Statistiques</h1>
+        <p className="text-muted-foreground">Analytiques detaillees et indicateurs de performance</p>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.title}>
@@ -66,18 +65,17 @@ export default function StatisticsPage() {
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
               <p className="text-xs text-green-600 mt-1">
-                {stat.change} from last month
+                {stat.change} depuis le mois dernier
               </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Charts Row */}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Performance</CardTitle>
+            <CardTitle>Performance mensuelle</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -94,8 +92,8 @@ export default function StatisticsPage() {
                     }}
                   />
                   <Legend />
-                  <Line type="monotone" dataKey="users" stroke="#0088FE" name="Users" />
-                  <Line type="monotone" dataKey="enrollments" stroke="#00C49F" name="Enrollments" />
+                  <Line type="monotone" dataKey="users" stroke="#0088FE" name="Utilisateurs" />
+                  <Line type="monotone" dataKey="enrollments" stroke="#00C49F" name="Inscriptions" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -104,7 +102,7 @@ export default function StatisticsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Enrollments</CardTitle>
+            <CardTitle>Inscriptions mensuelles</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -120,7 +118,7 @@ export default function StatisticsPage() {
                       borderRadius: '8px',
                     }}
                   />
-                  <Bar dataKey="enrollments" fill="#00C49F" name="Enrollments" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="enrollments" fill="#00C49F" name="Inscriptions" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -131,7 +129,7 @@ export default function StatisticsPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Formations by Category</CardTitle>
+            <CardTitle>Formations par categorie</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -166,7 +164,7 @@ export default function StatisticsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Completion Rates</CardTitle>
+            <CardTitle>Taux de completion</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

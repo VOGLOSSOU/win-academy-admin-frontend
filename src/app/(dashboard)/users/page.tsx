@@ -47,9 +47,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 const userSchema = z.object({
-  email: z.string().email('Invalid email'),
-  firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+  email: z.string().email('Email invalide'),
+  firstName: z.string().min(2, 'Le prenom doit contenir au moins 2 caracteres'),
+  lastName: z.string().min(2, 'Le nom doit contenir au moins 2 caracteres'),
   role: z.enum(['SUPER_ADMIN', 'ADMIN', 'INSTRUCTOR', 'STUDENT']),
   phone: z.string().optional(),
   address: z.string().optional(),
@@ -70,7 +70,6 @@ interface User {
   createdAt: string;
 }
 
-// Mock users data
 const mockUsers: User[] = [
   {
     id: '1',
@@ -145,7 +144,7 @@ export default function UsersPage() {
             : u
         )
       );
-      toast.success('User updated successfully');
+      toast.success('Utilisateur modifie avec succes');
     } else {
       const newUser: User = {
         id: Date.now().toString(),
@@ -154,7 +153,7 @@ export default function UsersPage() {
         createdAt: new Date().toISOString(),
       };
       setUsers((prev) => [...prev, newUser]);
-      toast.success('User created successfully');
+      toast.success('Utilisateur cree avec succes');
     }
     reset();
     setEditingUser(null);
@@ -172,7 +171,7 @@ export default function UsersPage() {
 
   const handleDelete = (id: string) => {
     setUsers((prev) => prev.filter((u) => u.id !== id));
-    toast.success('User deleted successfully');
+    toast.success('Utilisateur supprime avec succes');
   };
 
   const getRoleBadgeColor = (role: UserRole) => {
@@ -194,9 +193,9 @@ export default function UsersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Users</h1>
+          <h1 className="text-3xl font-bold">Utilisateurs</h1>
           <p className="text-muted-foreground">
-            Manage users and their roles in the system
+            Gerer les utilisateurs et leurs roles dans le systeme
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -208,24 +207,24 @@ export default function UsersPage() {
               }}
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add User
+              Ajouter un utilisateur
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editingUser ? 'Edit User' : 'Create New User'}
+                {editingUser ? 'Modifier l\'utilisateur' : 'Creer un nouvel utilisateur'}
               </DialogTitle>
               <DialogDescription>
                 {editingUser
-                  ? 'Update user information below'
-                  : 'Fill in the details to create a new user'}
+                  ? 'Mettre a jour les informations de l\'utilisateur'
+                  : 'Remplir les details pour creer un nouvel utilisateur'}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="firstName">Prenom</Label>
                   <Input id="firstName" {...register('firstName')} />
                   {errors.firstName && (
                     <p className="text-sm text-destructive">
@@ -234,7 +233,7 @@ export default function UsersPage() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
+                  <Label htmlFor="lastName">Nom</Label>
                   <Input id="lastName" {...register('lastName')} />
                   {errors.lastName && (
                     <p className="text-sm text-destructive">
@@ -261,13 +260,13 @@ export default function UsersPage() {
                   defaultValue={editingUser?.role}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select role" />
+                    <SelectValue placeholder="Selectionner un role" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
                     <SelectItem value="ADMIN">Admin</SelectItem>
-                    <SelectItem value="INSTRUCTOR">Instructor</SelectItem>
-                    <SelectItem value="STUDENT">Student</SelectItem>
+                    <SelectItem value="INSTRUCTOR">Instructeur</SelectItem>
+                    <SelectItem value="STUDENT">Apprenant</SelectItem>
                   </SelectContent>
                 </Select>
                 {errors.role && (
@@ -277,11 +276,11 @@ export default function UsersPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone (optional)</Label>
+                <Label htmlFor="phone">Telephone (optionnel)</Label>
                 <Input id="phone" {...register('phone')} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="address">Address (optional)</Label>
+                <Label htmlFor="address">Adresse (optionnel)</Label>
                 <Input id="address" {...register('address')} />
               </div>
               <DialogFooter>
@@ -290,10 +289,10 @@ export default function UsersPage() {
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
                 >
-                  Cancel
+                  Annuler
                 </Button>
                 <Button type="submit">
-                  {editingUser ? 'Update' : 'Create'}
+                  {editingUser ? 'Modifier' : 'Creer'}
                 </Button>
               </DialogFooter>
             </form>
@@ -301,14 +300,13 @@ export default function UsersPage() {
         </Dialog>
       </div>
 
-      {/* Filters */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search users..."
+                placeholder="Rechercher des utilisateurs..."
                 className="pl-10"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -317,33 +315,32 @@ export default function UsersPage() {
             <Select value={roleFilter} onValueChange={setRoleFilter}>
               <SelectTrigger className="w-[180px]">
                 <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Filter by role" />
+                <SelectValue placeholder="Filtrer par role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
+                <SelectItem value="all">Tous les roles</SelectItem>
                 <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
                 <SelectItem value="ADMIN">Admin</SelectItem>
-                <SelectItem value="INSTRUCTOR">Instructor</SelectItem>
-                <SelectItem value="STUDENT">Student</SelectItem>
+                <SelectItem value="INSTRUCTOR">Instructeur</SelectItem>
+                <SelectItem value="STUDENT">Apprenant</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Users Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Users List</CardTitle>
+          <CardTitle>Liste des utilisateurs</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>User</TableHead>
+                <TableHead>Utilisateur</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Joined</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Inscrit le</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -376,7 +373,7 @@ export default function UsersPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant={user.isActive ? 'default' : 'secondary'}>
-                      {user.isActive ? 'Active' : 'Inactive'}
+                      {user.isActive ? 'Actif' : 'Inactif'}
                     </Badge>
                   </TableCell>
                   <TableCell>{user.createdAt}</TableCell>
@@ -392,11 +389,11 @@ export default function UsersPage() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>
                           <Eye className="mr-2 h-4 w-4" />
-                          View Details
+                          Voir les details
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleEdit(user)}>
                           <Edit className="mr-2 h-4 w-4" />
-                          Edit
+                          Modifier
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -404,7 +401,7 @@ export default function UsersPage() {
                           className="text-destructive"
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
+                          Supprimer
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

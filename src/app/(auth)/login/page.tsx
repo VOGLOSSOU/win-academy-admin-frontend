@@ -14,8 +14,8 @@ import { useAuthStore } from '@/store';
 import { toast } from 'sonner';
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().email('Adresse email invalide'),
+  password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caracteres'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -37,10 +37,8 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Mock user data
       const mockUser = {
         id: '1',
         email: data.email,
@@ -53,10 +51,10 @@ export default function LoginPage() {
       };
 
       setAuth(mockUser, 'mock-jwt-token');
-      toast.success('Welcome back!');
+      toast.success('Bon retour !');
       router.push('/dashboard');
     } catch {
-      toast.error('Invalid credentials');
+      toast.error('Identifiants invalides');
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +69,7 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-2xl">Win Academy Admin</CardTitle>
           <CardDescription>
-            Enter your credentials to access the admin panel
+            Entrez vos identifiants pour acceder au panneau d administration
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -90,11 +88,11 @@ export default function LoginPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Mot de passe</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="********"
                 {...register('password')}
                 disabled={isLoading}
               />
@@ -103,7 +101,7 @@ export default function LoginPage() {
               )}
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? 'Connexion...' : 'Se connecter'}
             </Button>
           </form>
         </CardContent>

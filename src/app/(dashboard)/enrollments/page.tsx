@@ -43,10 +43,10 @@ interface Enrollment {
 }
 
 const mockEnrollments: Enrollment[] = [
-  { id: '1', userName: 'John Doe', userEmail: 'john@email.com', formationTitle: 'Web Development', status: 'IN_PROGRESS', progress: 65, enrolledAt: '2024-01-15' },
-  { id: '2', userName: 'Jane Smith', userEmail: 'jane@email.com', formationTitle: 'UI/UX Design', status: 'COMPLETED', progress: 100, enrolledAt: '2024-02-20' },
-  { id: '3', userName: 'Mike Wilson', userEmail: 'mike@email.com', formationTitle: 'Digital Marketing', status: 'PENDING', progress: 0, enrolledAt: '2024-03-10' },
-  { id: '4', userName: 'Sarah Brown', userEmail: 'sarah@email.com', formationTitle: 'Web Development', status: 'CERTIFIED', progress: 100, enrolledAt: '2024-04-05' },
+  { id: '1', userName: 'John Doe', userEmail: 'john@email.com', formationTitle: 'Developpement Web', status: 'IN_PROGRESS', progress: 65, enrolledAt: '2024-01-15' },
+  { id: '2', userName: 'Jane Smith', userEmail: 'jane@email.com', formationTitle: 'Design UI/UX', status: 'COMPLETED', progress: 100, enrolledAt: '2024-02-20' },
+  { id: '3', userName: 'Mike Wilson', userEmail: 'mike@email.com', formationTitle: 'Marketing Digital', status: 'PENDING', progress: 0, enrolledAt: '2024-03-10' },
+  { id: '4', userName: 'Sarah Brown', userEmail: 'sarah@email.com', formationTitle: 'Developpement Web', status: 'CERTIFIED', progress: 100, enrolledAt: '2024-04-05' },
 ];
 
 export default function EnrollmentsPage() {
@@ -79,25 +79,42 @@ export default function EnrollmentsPage() {
     }
   };
 
+  const getStatusLabel = (status: EnrollmentStatus) => {
+    switch (status) {
+      case 'PENDING':
+        return 'En attente';
+      case 'IN_PROGRESS':
+        return 'En cours';
+      case 'COMPLETED':
+        return 'Termine';
+      case 'CERTIFIED':
+        return 'Certifie';
+      case 'DROPPED':
+        return 'Abandonne';
+      default:
+        return status;
+    }
+  };
+
   const handleApprove = (id: string) => {
     setEnrollments((prev) =>
       prev.map((e) => e.id === id ? { ...e, status: 'IN_PROGRESS' as EnrollmentStatus } : e)
     );
-    toast.success('Enrollment approved');
+    toast.success('Inscription approuvee');
   };
 
   const handleReject = (id: string) => {
     setEnrollments((prev) =>
       prev.map((e) => e.id === id ? { ...e, status: 'DROPPED' as EnrollmentStatus } : e)
     );
-    toast.success('Enrollment rejected');
+    toast.success('Inscription rejetee');
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Enrollments</h1>
-        <p className="text-muted-foreground">Manage student enrollments</p>
+        <h1 className="text-3xl font-bold">Inscriptions</h1>
+        <p className="text-muted-foreground">Gerer les inscriptions des apprenants</p>
       </div>
 
       <Card>
@@ -105,30 +122,30 @@ export default function EnrollmentsPage() {
           <div className="flex gap-4 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Search enrollments..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+              <Input placeholder="Rechercher des inscriptions..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by status" />
+                <SelectValue placeholder="Filtrer par statut" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="PENDING">Pending</SelectItem>
-                <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                <SelectItem value="COMPLETED">Completed</SelectItem>
-                <SelectItem value="CERTIFIED">Certified</SelectItem>
-                <SelectItem value="DROPPED">Dropped</SelectItem>
+                <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value="PENDING">En attente</SelectItem>
+                <SelectItem value="IN_PROGRESS">En cours</SelectItem>
+                <SelectItem value="COMPLETED">Termine</SelectItem>
+                <SelectItem value="CERTIFIED">Certifie</SelectItem>
+                <SelectItem value="DROPPED">Abandonne</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Student</TableHead>
+                <TableHead>Apprenant</TableHead>
                 <TableHead>Formation</TableHead>
-                <TableHead>Progress</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Enrolled</TableHead>
+                <TableHead>Progression</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Inscrit le</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -152,7 +169,7 @@ export default function EnrollmentsPage() {
                   </TableCell>
                   <TableCell>
                     <Badge className={getStatusBadge(enrollment.status)}>
-                      {enrollment.status.replace('_', ' ')}
+                      {getStatusLabel(enrollment.status)}
                     </Badge>
                   </TableCell>
                   <TableCell>{enrollment.enrolledAt}</TableCell>
@@ -164,14 +181,14 @@ export default function EnrollmentsPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
+                        <DropdownMenuItem>Voir les details</DropdownMenuItem>
                         {enrollment.status === 'PENDING' && (
                           <>
                             <DropdownMenuItem onClick={() => handleApprove(enrollment.id)}>
-                              <CheckCircle className="mr-2 h-4 w-4" /> Approve
+                              <CheckCircle className="mr-2 h-4 w-4" /> Approuver
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleReject(enrollment.id)} className="text-destructive">
-                              <XCircle className="mr-2 h-4 w-4" /> Reject
+                              <XCircle className="mr-2 h-4 w-4" /> Rejeter
                             </DropdownMenuItem>
                           </>
                         )}

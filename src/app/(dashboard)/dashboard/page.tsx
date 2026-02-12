@@ -33,7 +33,7 @@ const formationsByCategory = [
 
 const stats = [
   {
-    title: 'Total Users',
+    title: 'Total Utilisateurs',
     value: '2,543',
     change: '+12%',
     icon: Users,
@@ -41,7 +41,7 @@ const stats = [
     bgColor: 'bg-blue-100',
   },
   {
-    title: 'Active Formations',
+    title: 'Formations actives',
     value: '156',
     change: '+8%',
     icon: GraduationCap,
@@ -49,7 +49,7 @@ const stats = [
     bgColor: 'bg-green-100',
   },
   {
-    title: 'New Enrollments',
+    title: 'Nouvelles inscriptions',
     value: '892',
     change: '+23%',
     icon: UserPlus,
@@ -57,7 +57,7 @@ const stats = [
     bgColor: 'bg-purple-100',
   },
   {
-    title: 'Certificates Issued',
+    title: 'Certificats delivres',
     value: '1,245',
     change: '+18%',
     icon: Award,
@@ -70,9 +70,9 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-3xl font-bold">Tableau de bord</h1>
         <p className="text-muted-foreground">
-          Welcome back! Here is what is happening with your academy.
+          Bon retour ! Voici ce qui se passe dans votre academie.
         </p>
       </div>
 
@@ -100,7 +100,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Enrollments Overview</CardTitle>
+            <CardTitle>Apercu des inscriptions</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -129,7 +129,7 @@ export default function DashboardPage() {
 
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Formations by Category</CardTitle>
+            <CardTitle>Formations par categorie</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">

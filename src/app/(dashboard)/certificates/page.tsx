@@ -35,9 +35,9 @@ interface Certificate {
 }
 
 const mockCertificates: Certificate[] = [
-  { id: '1', userName: 'John Doe', userEmail: 'john@email.com', formationTitle: 'Web Development', certificateNumber: 'WA-2024-001', issuedAt: '2024-01-20', verificationCode: 'ABC123' },
-  { id: '2', userName: 'Jane Smith', userEmail: 'jane@email.com', formationTitle: 'UI/UX Design', certificateNumber: 'WA-2024-002', issuedAt: '2024-02-25', verificationCode: 'DEF456' },
-  { id: '3', userName: 'Mike Wilson', userEmail: 'mike@email.com', formationTitle: 'Digital Marketing', certificateNumber: 'WA-2024-003', issuedAt: '2024-03-15', verificationCode: 'GHI789' },
+  { id: '1', userName: 'John Doe', userEmail: 'john@email.com', formationTitle: 'Developpement Web', certificateNumber: 'WA-2024-001', issuedAt: '2024-01-20', verificationCode: 'ABC123' },
+  { id: '2', userName: 'Jane Smith', userEmail: 'jane@email.com', formationTitle: 'Design UI/UX', certificateNumber: 'WA-2024-002', issuedAt: '2024-02-25', verificationCode: 'DEF456' },
+  { id: '3', userName: 'Mike Wilson', userEmail: 'mike@email.com', formationTitle: 'Marketing Digital', certificateNumber: 'WA-2024-003', issuedAt: '2024-03-15', verificationCode: 'GHI789' },
 ];
 
 export default function CertificatesPage() {
@@ -50,22 +50,22 @@ export default function CertificatesPage() {
   );
 
   const handleDownload = (cert: Certificate) => {
-    toast.success(`Downloading certificate ${cert.certificateNumber}`);
+    toast.success(`Telechargement du certificat ${cert.certificateNumber}`);
   };
 
   const handleVerify = (code: string) => {
-    toast.success(`Certificate verified: ${code}`);
+    toast.success(`Certificat verifie : ${code}`);
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Certificates</h1>
-          <p className="text-muted-foreground">Manage and issue certificates</p>
+          <h1 className="text-3xl font-bold">Certificats</h1>
+          <p className="text-muted-foreground">Gerer et delivrer les certificats</p>
         </div>
         <Button>
-          <FileCheck className="mr-2 h-4 w-4" /> Issue Certificate
+          <FileCheck className="mr-2 h-4 w-4" /> Delivrer un certificat
         </Button>
       </div>
 
@@ -73,15 +73,15 @@ export default function CertificatesPage() {
         <CardContent className="pt-6">
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search certificates..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <Input placeholder="Rechercher des certificats..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Certificate #</TableHead>
-                <TableHead>Student</TableHead>
+                <TableHead>Certificat #</TableHead>
+                <TableHead>Apprenant</TableHead>
                 <TableHead>Formation</TableHead>
-                <TableHead>Issued</TableHead>
+                <TableHead>Delivre le</TableHead>
                 <TableHead>Verification</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -109,12 +109,12 @@ export default function CertificatesPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>View Certificate</DropdownMenuItem>
+                        <DropdownMenuItem>Voir le certificat</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleDownload(cert)}>
-                          <Download className="mr-2 h-4 w-4" /> Download PDF
+                          <Download className="mr-2 h-4 w-4" /> Telecharger PDF
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleVerify(cert.verificationCode)}>
-                          Verify
+                          Verifier
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

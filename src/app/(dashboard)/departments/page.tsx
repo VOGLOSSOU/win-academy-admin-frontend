@@ -38,7 +38,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 const departmentSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+  name: z.string().min(2, 'Le nom doit contenir au moins 2 caracteres'),
   description: z.string().optional(),
 });
 
@@ -53,9 +53,9 @@ interface Department {
 }
 
 const mockDepartments: Department[] = [
-  { id: '1', name: 'Technology', description: 'Technology department', isActive: true, createdAt: '2024-01-15' },
-  { id: '2', name: 'Business', description: 'Business department', isActive: true, createdAt: '2024-02-20' },
-  { id: '3', name: 'Design', description: 'Design department', isActive: false, createdAt: '2024-03-10' },
+  { id: '1', name: 'Technologie', description: 'Departement technologie', isActive: true, createdAt: '2024-01-15' },
+  { id: '2', name: 'Business', description: 'Departement business', isActive: true, createdAt: '2024-02-20' },
+  { id: '3', name: 'Design', description: 'Departement design', isActive: false, createdAt: '2024-03-10' },
 ];
 
 export default function DepartmentsPage() {
@@ -77,7 +77,7 @@ export default function DepartmentsPage() {
       setDepartments((prev) =>
         prev.map((d) => d.id === editingDepartment.id ? { ...d, ...data } : d)
       );
-      toast.success('Department updated successfully');
+      toast.success('Departement modifie avec succes');
     } else {
       const newDept: Department = {
         id: Date.now().toString(),
@@ -86,7 +86,7 @@ export default function DepartmentsPage() {
         createdAt: new Date().toISOString().split('T')[0],
       };
       setDepartments((prev) => [...prev, newDept]);
-      toast.success('Department created successfully');
+      toast.success('Departement cree avec succes');
     }
     reset();
     setEditingDepartment(null);
@@ -102,36 +102,35 @@ export default function DepartmentsPage() {
 
   const handleDelete = (id: string) => {
     setDepartments((prev) => prev.filter((d) => d.id !== id));
-    toast.success('Department deleted successfully');
+    toast.success('Departement supprime avec succes');
   };
 
   const setValue = (name: keyof DepartmentFormValues, value: string) => {
-    // Type-safe way to set form values
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Departments</h1>
-          <p className="text-muted-foreground">Manage departments in the system</p>
+          <h1 className="text-3xl font-bold">Departements</h1>
+          <p className="text-muted-foreground">Gerer les departements du systeme</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => { setEditingDepartment(null); reset(); }}>
-              <Plus className="mr-2 h-4 w-4" /> Add Department
+              <Plus className="mr-2 h-4 w-4" /> Ajouter un departement
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingDepartment ? 'Edit Department' : 'Create Department'}</DialogTitle>
+              <DialogTitle>{editingDepartment ? 'Modifier le departement' : 'Creer un departement'}</DialogTitle>
               <DialogDescription>
-                {editingDepartment ? 'Update department information' : 'Fill in the details'}
+                {editingDepartment ? 'Mettre a jour les informations du departement' : 'Remplir les details'}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Nom</Label>
                 <Input id="name" {...register('name')} />
                 {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
               </div>
@@ -140,8 +139,8 @@ export default function DepartmentsPage() {
                 <Input id="description" {...register('description')} />
               </div>
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                <Button type="submit">{editingDepartment ? 'Update' : 'Create'}</Button>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
+                <Button type="submit">{editingDepartment ? 'Modifier' : 'Creer'}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -152,14 +151,14 @@ export default function DepartmentsPage() {
         <CardContent className="pt-6">
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search departments..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <Input placeholder="Rechercher des departements..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>Nom</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Statut</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -170,7 +169,7 @@ export default function DepartmentsPage() {
                   <TableCell>{dept.description}</TableCell>
                   <TableCell>
                     <Badge variant={dept.isActive ? 'default' : 'secondary'}>
-                      {dept.isActive ? 'Active' : 'Inactive'}
+                      {dept.isActive ? 'Actif' : 'Inactif'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -181,8 +180,8 @@ export default function DepartmentsPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleEdit(dept)}>Edit</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(dept.id)} className="text-destructive">Delete</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEdit(dept)}>Modifier</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDelete(dept.id)} className="text-destructive">Supprimer</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

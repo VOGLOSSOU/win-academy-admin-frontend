@@ -38,7 +38,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 const categorySchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+  name: z.string().min(2, 'Le nom doit contenir au moins 2 caracteres'),
   description: z.string().optional(),
 });
 
@@ -52,9 +52,9 @@ interface Category {
 }
 
 const mockCategories: Category[] = [
-  { id: '1', name: 'Programming', description: 'Programming courses', isActive: true },
-  { id: '2', name: 'Design', description: 'Design courses', isActive: true },
-  { id: '3', name: 'Marketing', description: 'Marketing courses', isActive: false },
+  { id: '1', name: 'Programmation', description: 'Cours de programmation', isActive: true },
+  { id: '2', name: 'Design', description: 'Cours de design', isActive: true },
+  { id: '3', name: 'Marketing', description: 'Cours de marketing', isActive: false },
 ];
 
 export default function CategoriesPage() {
@@ -76,7 +76,7 @@ export default function CategoriesPage() {
       setCategories((prev) =>
         prev.map((c) => c.id === editingCategory.id ? { ...c, ...data } : c)
       );
-      toast.success('Category updated successfully');
+      toast.success('Categorie modifiee avec succes');
     } else {
       const newCategory: Category = {
         id: Date.now().toString(),
@@ -84,7 +84,7 @@ export default function CategoriesPage() {
         isActive: true,
       };
       setCategories((prev) => [...prev, newCategory]);
-      toast.success('Category created successfully');
+      toast.success('Categorie creee avec succes');
     }
     reset();
     setEditingCategory(null);
@@ -100,11 +100,10 @@ export default function CategoriesPage() {
 
   const handleDelete = (id: string) => {
     setCategories((prev) => prev.filter((c) => c.id !== id));
-    toast.success('Category deleted successfully');
+    toast.success('Categorie supprimee avec succes');
   };
 
   const setValue = (name: keyof CategoryFormValues, value: string) => {
-    // Type-safe way to set form values
   };
 
   return (
@@ -112,24 +111,24 @@ export default function CategoriesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Categories</h1>
-          <p className="text-muted-foreground">Manage formation categories</p>
+          <p className="text-muted-foreground">Gerer les categories de formations</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => { setEditingCategory(null); reset(); }}>
-              <Plus className="mr-2 h-4 w-4" /> Add Category
+              <Plus className="mr-2 h-4 w-4" /> Ajouter une categorie
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingCategory ? 'Edit Category' : 'Create Category'}</DialogTitle>
+              <DialogTitle>{editingCategory ? 'Modifier la categorie' : 'Creer une categorie'}</DialogTitle>
               <DialogDescription>
-                {editingCategory ? 'Update category information' : 'Fill in the details'}
+                {editingCategory ? 'Mettre a jour les informations de la categorie' : 'Remplir les details'}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Nom</Label>
                 <Input id="name" {...register('name')} />
                 {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
               </div>
@@ -138,8 +137,8 @@ export default function CategoriesPage() {
                 <Input id="description" {...register('description')} />
               </div>
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                <Button type="submit">{editingCategory ? 'Update' : 'Create'}</Button>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
+                <Button type="submit">{editingCategory ? 'Modifier' : 'Creer'}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -150,14 +149,14 @@ export default function CategoriesPage() {
         <CardContent className="pt-6">
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search categories..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <Input placeholder="Rechercher des categories..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>Nom</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Statut</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -168,7 +167,7 @@ export default function CategoriesPage() {
                   <TableCell>{category.description}</TableCell>
                   <TableCell>
                     <Badge variant={category.isActive ? 'default' : 'secondary'}>
-                      {category.isActive ? 'Active' : 'Inactive'}
+                      {category.isActive ? 'Actif' : 'Inactif'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -179,8 +178,8 @@ export default function CategoriesPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleEdit(category)}>Edit</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(category.id)} className="text-destructive">Delete</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEdit(category)}>Modifier</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDelete(category.id)} className="text-destructive">Supprimer</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

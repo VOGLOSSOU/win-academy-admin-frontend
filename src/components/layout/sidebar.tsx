@@ -32,16 +32,16 @@ import {
 import { useAuthStore } from '@/store';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Users', href: '/users', icon: Users },
-  { name: 'Departments', href: '/departments', icon: Building2 },
+  { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Utilisateurs', href: '/users', icon: Users },
+  { name: 'Departements', href: '/departments', icon: Building2 },
   { name: 'Communes', href: '/communes', icon: MapPin },
   { name: 'Categories', href: '/categories', icon: FolderOpen },
   { name: 'Formations', href: '/formations', icon: GraduationCap },
   { name: 'Evaluations', href: '/evaluations', icon: ClipboardCheck },
-  { name: 'Enrollments', href: '/enrollments', icon: UserPlus },
-  { name: 'Certificates', href: '/certificates', icon: Award },
-  { name: 'Statistics', href: '/statistics', icon: BarChart3 },
+  { name: 'Inscriptions', href: '/enrollments', icon: UserPlus },
+  { name: 'Certificats', href: '/certificates', icon: Award },
+  { name: 'Statistiques', href: '/statistics', icon: BarChart3 },
 ];
 
 export function Sidebar() {
@@ -135,11 +135,11 @@ export function Sidebar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
-                Log out
+                Deconnexion
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -45,8 +45,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 const communeSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  departmentId: z.string().min(1, 'Select a department'),
+  name: z.string().min(2, 'Le nom doit contenir au moins 2 caracteres'),
+  departmentId: z.string().min(1, 'Selectionner un departement'),
 });
 
 type CommuneFormValues = z.infer<typeof communeSchema>;
@@ -61,13 +61,13 @@ interface Commune {
 
 const mockCommunes: Commune[] = [
   { id: '1', name: 'Cotonou', departmentId: '1', departmentName: 'Littoral', isActive: true },
-  { id: '2', name: 'Porto-Novo', departmentId: '2', departmentName: 'Ouémé', isActive: true },
+  { id: '2', name: 'Porto-Novo', departmentId: '2', departmentName: 'Oueme', isActive: true },
   { id: '3', name: 'Parakou', departmentId: '3', departmentName: 'Borgou', isActive: false },
 ];
 
 const departments = [
   { id: '1', name: 'Littoral' },
-  { id: '2', name: 'Ouémé' },
+  { id: '2', name: 'Oueme' },
   { id: '3', name: 'Borgou' },
 ];
 
@@ -91,7 +91,7 @@ export default function CommunesPage() {
       setCommunes((prev) =>
         prev.map((c) => c.id === editingCommune.id ? { ...c, ...data, departmentName: dept?.name || '' } : c)
       );
-      toast.success('Commune updated successfully');
+      toast.success('Commune modifiee avec succes');
     } else {
       const newCommune: Commune = {
         id: Date.now().toString(),
@@ -100,7 +100,7 @@ export default function CommunesPage() {
         isActive: true,
       };
       setCommunes((prev) => [...prev, newCommune]);
-      toast.success('Commune created successfully');
+      toast.success('Commune creee avec succes');
     }
     reset();
     setEditingCommune(null);
@@ -116,7 +116,7 @@ export default function CommunesPage() {
 
   const handleDelete = (id: string) => {
     setCommunes((prev) => prev.filter((c) => c.id !== id));
-    toast.success('Commune deleted successfully');
+    toast.success('Commune supprimee avec succes');
   };
 
   return (
@@ -124,32 +124,32 @@ export default function CommunesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Communes</h1>
-          <p className="text-muted-foreground">Manage communes and their departments</p>
+          <p className="text-muted-foreground">Gerer les communes et leurs departements</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => { setEditingCommune(null); reset(); }}>
-              <Plus className="mr-2 h-4 w-4" /> Add Commune
+              <Plus className="mr-2 h-4 w-4" /> Ajouter une commune
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingCommune ? 'Edit Commune' : 'Create Commune'}</DialogTitle>
+              <DialogTitle>{editingCommune ? 'Modifier la commune' : 'Creer une commune'}</DialogTitle>
               <DialogDescription>
-                {editingCommune ? 'Update commune information' : 'Fill in the details'}
+                {editingCommune ? 'Mettre a jour les informations de la commune' : 'Remplir les details'}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Nom</Label>
                 <Input id="name" {...register('name')} />
                 {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="departmentId">Department</Label>
+                <Label htmlFor="departmentId">Departement</Label>
                 <Select onValueChange={(value) => setValue('departmentId', value)} defaultValue={editingCommune?.departmentId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder="Selectionner un departement" />
                   </SelectTrigger>
                   <SelectContent>
                     {departments.map((dept) => (
@@ -160,8 +160,8 @@ export default function CommunesPage() {
                 {errors.departmentId && <p className="text-sm text-destructive">{errors.departmentId.message}</p>}
               </div>
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                <Button type="submit">{editingCommune ? 'Update' : 'Create'}</Button>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
+                <Button type="submit">{editingCommune ? 'Modifier' : 'Creer'}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -172,14 +172,14 @@ export default function CommunesPage() {
         <CardContent className="pt-6">
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search communes..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <Input placeholder="Rechercher des communes..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Nom</TableHead>
+                <TableHead>Departement</TableHead>
+                <TableHead>Statut</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -190,7 +190,7 @@ export default function CommunesPage() {
                   <TableCell>{commune.departmentName}</TableCell>
                   <TableCell>
                     <Badge variant={commune.isActive ? 'default' : 'secondary'}>
-                      {commune.isActive ? 'Active' : 'Inactive'}
+                      {commune.isActive ? 'Actif' : 'Inactif'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -201,8 +201,8 @@ export default function CommunesPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleEdit(commune)}>Edit</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(commune.id)} className="text-destructive">Delete</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEdit(commune)}>Modifier</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDelete(commune.id)} className="text-destructive">Supprimer</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
