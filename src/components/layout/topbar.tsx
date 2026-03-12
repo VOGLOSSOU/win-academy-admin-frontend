@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Moon, Sun, Search } from 'lucide-react';
+import { Moon, Sun, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTheme } from 'next-themes';
@@ -8,11 +8,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
 
 export function Topbar() {
   const { setTheme, theme } = useTheme();
@@ -54,46 +51,6 @@ export function Topbar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Notifications */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <Badge
-                variant="destructive"
-                className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]"
-              >
-                3
-              </Badge>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
-              <span className="font-medium">New enrollment</span>
-              <span className="text-xs text-muted-foreground">
-                John Doe enrolled in Web Development
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
-              <span className="font-medium">Certificate issued</span>
-              <span className="text-xs text-muted-foreground">
-                Jane Smith received a certificate
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
-              <span className="font-medium">New formation</span>
-              <span className="text-xs text-muted-foreground">
-                Data Science formation is now live
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-center justify-center text-primary">
-              View all notifications
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </header>
   );
