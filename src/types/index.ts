@@ -58,6 +58,7 @@ export interface ApiFormation {
   fullDescription?: string | null;
   level?: FormationLevel;
   duration?: number;
+  price?: number;
   image?: string | null;
   categoryId?: string;
   createdAt: string;

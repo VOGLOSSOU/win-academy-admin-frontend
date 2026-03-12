@@ -42,6 +42,7 @@ const formationSchema = z.object({
   fullDescription: z.string().optional(),
   level: z.enum(['DEBUTANT', 'INTERMEDIAIRE', 'AVANCE']).optional(),
   duration: z.number().min(1).optional(),
+  price: z.number().min(0).optional(),
   categoryId: z.string().optional(),
 });
 
@@ -339,7 +340,7 @@ export default function FormationsPage() {
               <Label>Description complète</Label>
               <Textarea {...register('fullDescription')} rows={3} />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Niveau</Label>
                 <Select onValueChange={(v) => setValue('level', v as FormationLevel)}>
@@ -354,6 +355,11 @@ export default function FormationsPage() {
               <div className="space-y-2">
                 <Label>Durée (min)</Label>
                 <Input type="number" {...register('duration', { valueAsNumber: true })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Prix (FCFA) — laisser vide ou 0 pour gratuit</Label>
+                <Input type="number" min={0} {...register('price', { valueAsNumber: true })} placeholder="0" />
+                {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
               </div>
               <div className="space-y-2">
                 <Label>Catégorie</Label>
@@ -402,6 +408,7 @@ export default function FormationsPage() {
                   <TableHead>Catégorie</TableHead>
                   <TableHead>Niveau</TableHead>
                   <TableHead>Durée</TableHead>
+                  <TableHead>Prix</TableHead>
                   <TableHead>Inscrits</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -409,7 +416,7 @@ export default function FormationsPage() {
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                       Aucune formation trouvée
                     </TableCell>
                   </TableRow>
@@ -433,6 +440,13 @@ export default function FormationsPage() {
                           ) : '—'}
                         </TableCell>
                         <TableCell>{formation.duration ? `${formation.duration} min` : '—'}</TableCell>
+                        <TableCell>
+                          {formation.price === undefined ? '—' : formation.price === 0 ? (
+                            <Badge variant="secondary">Gratuit</Badge>
+                          ) : (
+                            `${formation.price.toLocaleString('fr-FR')} FCFA`
+                          )}
+                        </TableCell>
                         <TableCell>{formation._count?.enrollments ?? 0}</TableCell>
                         <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
@@ -460,7 +474,7 @@ export default function FormationsPage() {
                       </TableRow>
                       {expanded === formation.id && (
                         <TableRow>
-                          <TableCell colSpan={7} className="p-0">
+                          <TableCell colSpan={8} className="p-0">
                             <FormationModules formation={formation} />
                           </TableCell>
                         </TableRow>

@@ -57,6 +57,7 @@ export function useCreateFormation() {
       fullDescription?: string;
       level?: FormationLevel;
       duration?: number;
+      price?: number;
       image?: string | null;
       categoryId?: string;
     }) => api.post<ApiFormation>('/formations', body),
@@ -67,7 +68,7 @@ export function useCreateFormation() {
 export function useUpdateFormation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...body }: { id: string; shortDescription?: string; image?: string | null }) =>
+    mutationFn: ({ id, ...body }: { id: string; shortDescription?: string; price?: number; image?: string | null }) =>
       api.patch<ApiFormation>(`/formations/${id}`, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: [QUERY_KEY] }),
   });
