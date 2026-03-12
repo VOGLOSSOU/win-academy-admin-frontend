@@ -116,7 +116,7 @@ export function Sidebar() {
                 )}
               >
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.avatar} />
+                  <AvatarImage src={undefined} />
                   <AvatarFallback>
                     {user?.firstName?.[0]}
                     {user?.lastName?.[0]}

@@ -4,129 +4,306 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
+import React from 'react';
+import { Plus, Search, MoreHorizontal, ChevronDown, ChevronRight, Layers, FileVideo, FileText, Image as ImageIcon, File } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import {
+  useFormations, useCreateFormation, useDeleteFormation,
+  useModules, useCreateModule, useDeleteModule,
+  useCreateContent, useDeleteContent,
+} from '@/hooks';
+import { useCategories } from '@/hooks';
+import { ApiFormation, ApiModule, ContentType, FormationLevel } from '@/types';
 
+// ─── Schemas ──────────────────────────────────────────────────────────────────
 const formationSchema = z.object({
-  title: z.string().min(2, 'Le titre doit contenir au moins 2 caracteres'),
-  description: z.string().min(10, 'La description doit contenir au moins 10 caracteres'),
-  categoryId: z.string().min(1, 'Selectionner une categorie'),
-  duration: z.number().min(1, 'La duree doit etre d au moins 1 heure'),
+  title: z.string().min(2, 'Au moins 2 caractères'),
+  shortDescription: z.string().optional(),
+  fullDescription: z.string().optional(),
+  level: z.enum(['DEBUTANT', 'INTERMEDIAIRE', 'AVANCE']).optional(),
+  duration: z.number().min(1).optional(),
+  categoryId: z.string().optional(),
+});
+
+const moduleSchema = z.object({
+  title: z.string().min(2, 'Au moins 2 caractères'),
+  description: z.string().optional(),
+  order: z.number().min(1),
+});
+
+const contentSchema = z.object({
+  type: z.enum(['VIDEO', 'PDF', 'TEXT', 'IMAGE']),
+  title: z.string().min(2, 'Au moins 2 caractères'),
+  url: z.string().optional(),
+  body: z.string().optional(),
+  order: z.number().min(1),
 });
 
 type FormationFormValues = z.infer<typeof formationSchema>;
+type ModuleFormValues = z.infer<typeof moduleSchema>;
+type ContentFormValues = z.infer<typeof contentSchema>;
 
-interface Formation {
-  id: string;
-  title: string;
-  description: string;
-  categoryId: string;
-  categoryName: string;
-  duration: number;
-  isPublished: boolean;
+const LEVEL_LABELS: Record<FormationLevel, string> = {
+  DEBUTANT: 'Débutant',
+  INTERMEDIAIRE: 'Intermédiaire',
+  AVANCE: 'Avancé',
+};
+
+const CONTENT_ICONS: Record<ContentType, typeof FileVideo> = {
+  VIDEO: FileVideo,
+  PDF: File,
+  TEXT: FileText,
+  IMAGE: ImageIcon,
+};
+
+// ─── Sous-composant : Modules d'une formation ─────────────────────────────────
+function FormationModules({ formation }: { formation: ApiFormation }) {
+  const { data: modules = [], isLoading } = useModules(formation.id);
+  const createModule = useCreateModule();
+  const deleteModule = useDeleteModule();
+  const createContent = useCreateContent();
+  const deleteContent = useDeleteContent();
+
+  const [moduleDialog, setModuleDialog] = useState(false);
+  const [contentDialog, setContentDialog] = useState<string | null>(null); // moduleId
+
+  const { register: regMod, handleSubmit: handleMod, reset: resetMod, formState: { errors: errMod } } = useForm<ModuleFormValues>({
+    resolver: zodResolver(moduleSchema),
+    defaultValues: { order: (modules.length ?? 0) + 1 },
+  });
+
+  const { register: regCont, handleSubmit: handleCont, reset: resetCont, setValue: setContVal, watch: watchCont, formState: { errors: errCont } } = useForm<ContentFormValues>({
+    resolver: zodResolver(contentSchema),
+    defaultValues: { type: 'VIDEO', order: 1 },
+  });
+
+  const contentType = watchCont('type');
+
+  const onSubmitModule = async (data: ModuleFormValues) => {
+    try {
+      await createModule.mutateAsync({ ...data, formationId: formation.id });
+      toast.success('Module créé');
+      setModuleDialog(false);
+      resetMod();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur');
+    }
+  };
+
+  const onSubmitContent = async (data: ContentFormValues) => {
+    if (!contentDialog) return;
+    try {
+      const { body: textBody, ...rest } = data;
+      await createContent.mutateAsync({ ...rest, textBody, moduleId: contentDialog, formationId: formation.id });
+      toast.success('Contenu ajouté');
+      setContentDialog(null);
+      resetCont();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur');
+    }
+  };
+
+  if (isLoading) return <div className="p-4"><Skeleton className="h-20 w-full" /></div>;
+
+  return (
+    <div className="border-t bg-muted/30 p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium text-muted-foreground">
+          {modules.length} module(s)
+        </p>
+        <Button size="sm" variant="outline" onClick={() => { resetMod({ order: modules.length + 1 }); setModuleDialog(true); }}>
+          <Plus className="h-3 w-3 mr-1" /> Module
+        </Button>
+      </div>
+
+      {modules.map((mod) => (
+        <div key={mod.id} className="rounded-md border bg-background p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="font-medium text-sm">
+              {mod.order}. {mod.title}
+            </span>
+            <div className="flex gap-2">
+              <Button size="sm" variant="ghost" onClick={() => { resetCont({ type: 'VIDEO', order: (mod.contents?.length ?? 0) + 1 }); setContentDialog(mod.id); }}>
+                <Plus className="h-3 w-3 mr-1" /> Contenu
+              </Button>
+              <Button size="sm" variant="ghost" className="text-destructive" onClick={async () => {
+                try {
+                  await deleteModule.mutateAsync({ id: mod.id, formationId: formation.id });
+                  toast.success('Module supprimé');
+                } catch (err) { toast.error(err instanceof Error ? err.message : 'Erreur'); }
+              }}>
+                Supprimer
+              </Button>
+            </div>
+          </div>
+
+          {(mod.contents ?? []).map((content) => {
+            const Icon = CONTENT_ICONS[content.type];
+            return (
+              <div key={content.id} className="flex items-center justify-between pl-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Icon className="h-3.5 w-3.5" />
+                  <span>{content.order}. {content.title}</span>
+                  <Badge variant="outline" className="text-xs">{content.type}</Badge>
+                </div>
+                <Button size="sm" variant="ghost" className="text-destructive h-6 text-xs" onClick={async () => {
+                  try {
+                    await deleteContent.mutateAsync({ id: content.id, formationId: formation.id });
+                    toast.success('Contenu supprimé');
+                  } catch (err) { toast.error(err instanceof Error ? err.message : 'Erreur'); }
+                }}>
+                  Supprimer
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      ))}
+
+      {/* Dialog ajout module */}
+      <Dialog open={moduleDialog} onOpenChange={setModuleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter un module</DialogTitle>
+            <DialogDescription>Nouveau chapitre pour « {formation.title} »</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleMod(onSubmitModule)} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Titre</Label>
+              <Input {...regMod('title')} />
+              {errMod.title && <p className="text-sm text-destructive">{errMod.title.message}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input {...regMod('description')} />
+            </div>
+            <div className="space-y-2">
+              <Label>Ordre</Label>
+              <Input type="number" {...regMod('order', { valueAsNumber: true })} />
+              {errMod.order && <p className="text-sm text-destructive">{errMod.order.message}</p>}
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setModuleDialog(false)}>Annuler</Button>
+              <Button type="submit" disabled={createModule.isPending}>
+                {createModule.isPending ? 'Enregistrement…' : 'Créer'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog ajout contenu */}
+      <Dialog open={!!contentDialog} onOpenChange={(o) => { if (!o) setContentDialog(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter un contenu</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCont(onSubmitContent)} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select onValueChange={(v) => setContVal('type', v as ContentType)} defaultValue="VIDEO">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="VIDEO">Vidéo</SelectItem>
+                  <SelectItem value="PDF">PDF</SelectItem>
+                  <SelectItem value="TEXT">Texte</SelectItem>
+                  <SelectItem value="IMAGE">Image</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Titre</Label>
+              <Input {...regCont('title')} />
+              {errCont.title && <p className="text-sm text-destructive">{errCont.title.message}</p>}
+            </div>
+            {contentType !== 'TEXT' && (
+              <div className="space-y-2">
+                <Label>URL</Label>
+                <Input {...regCont('url')} placeholder="https://…" />
+              </div>
+            )}
+            {contentType === 'TEXT' && (
+              <div className="space-y-2">
+                <Label>Contenu texte</Label>
+                <Textarea {...regCont('body')} rows={4} />
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label>Ordre</Label>
+              <Input type="number" {...regCont('order', { valueAsNumber: true })} />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setContentDialog(null)}>Annuler</Button>
+              <Button type="submit" disabled={createContent.isPending}>
+                {createContent.isPending ? 'Enregistrement…' : 'Ajouter'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }
 
-const mockFormations: Formation[] = [
-  { id: '1', title: 'Developpement Web', description: 'Cours complet de developpement web', categoryId: '1', categoryName: 'Programmation', duration: 40, isPublished: true },
-  { id: '2', title: 'Design UI/UX', description: 'Apprendre les principes du design UI/UX', categoryId: '2', categoryName: 'Design', duration: 30, isPublished: true },
-  { id: '3', title: 'Marketing Digital', description: 'Maitriser le marketing digital', categoryId: '3', categoryName: 'Marketing', duration: 20, isPublished: false },
-];
-
-const categories = [
-  { id: '1', name: 'Programmation' },
-  { id: '2', name: 'Design' },
-  { id: '3', name: 'Marketing' },
-];
-
+// ─── Page principale ──────────────────────────────────────────────────────────
 export default function FormationsPage() {
-  const [formations, setFormations] = useState<Formation[]>(mockFormations);
+  const { data, isLoading } = useFormations();
+  const { data: categoriesData } = useCategories();
+  const createFormation = useCreateFormation();
+  const deleteFormation = useDeleteFormation();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingFormation, setEditingFormation] = useState<Formation | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormationFormValues>({
     resolver: zodResolver(formationSchema),
-    defaultValues: {
-      duration: 0,
-    },
   });
 
-  const filteredFormations = formations.filter((formation) =>
-    formation.title.toLowerCase().includes(searchQuery.toLowerCase())
+  const formations = data?.data ?? [];
+  const categories = categoriesData?.data ?? [];
+  const filtered = formations.filter((f) =>
+    f.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const onSubmit = async (data: FormationFormValues) => {
-    const category = categories.find(c => c.id === data.categoryId);
-    if (editingFormation) {
-      setFormations((prev) =>
-        prev.map((f) => f.id === editingFormation.id ? { ...f, ...data, categoryName: category?.name || '' } : f)
-      );
-      toast.success('Formation modifiee avec succes');
-    } else {
-      const newFormation: Formation = {
-        id: Date.now().toString(),
-        ...data,
-        categoryName: category?.name || '',
-        isPublished: false,
-      };
-      setFormations((prev) => [...prev, newFormation]);
-      toast.success('Formation creee avec succes');
+    try {
+      await createFormation.mutateAsync(data);
+      toast.success('Formation créée');
+      setIsDialogOpen(false);
+      reset();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur');
     }
-    reset();
-    setEditingFormation(null);
-    setIsDialogOpen(false);
   };
 
-  const handleEdit = (formation: Formation) => {
-    setEditingFormation(formation);
-    setValue('title', formation.title);
-    setValue('description', formation.description);
-    setValue('categoryId', formation.categoryId);
-    setValue('duration', formation.duration);
-    setIsDialogOpen(true);
-  };
-
-  const handleDelete = (id: string) => {
-    setFormations((prev) => prev.filter((f) => f.id !== id));
-    toast.success('Formation supprimee avec succes');
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteFormation.mutateAsync(id);
+      toast.success('Formation supprimée');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur');
+    }
   };
 
   return (
@@ -134,105 +311,166 @@ export default function FormationsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Formations</h1>
-          <p className="text-muted-foreground">Gerer les formations avec leurs modules et contenus</p>
+          <p className="text-muted-foreground">Gérer les formations, modules et contenus</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => { setEditingFormation(null); reset(); }}>
-              <Plus className="mr-2 h-4 w-4" /> Ajouter une formation
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{editingFormation ? 'Modifier la formation' : 'Creer une formation'}</DialogTitle>
-              <DialogDescription>
-                {editingFormation ? 'Mettre a jour les informations de la formation' : 'Remplir les details pour creer une nouvelle formation'}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Titre</Label>
-                <Input id="title" {...register('title')} />
-                {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea id="description" {...register('description')} />
-                {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="categoryId">Categorie</Label>
-                  <Select onValueChange={(value) => setValue('categoryId', value)} defaultValue={editingFormation?.categoryId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selectionner une categorie" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="duration">Duree (heures)</Label>
-                  <Input id="duration" type="number" {...register('duration', { valueAsNumber: true })} />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
-                <Button type="submit">{editingFormation ? 'Modifier' : 'Creer'}</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={() => { reset(); setIsDialogOpen(true); }}>
+          <Plus className="mr-2 h-4 w-4" /> Ajouter une formation
+        </Button>
       </div>
+
+      {/* Dialog création formation */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Créer une formation</DialogTitle>
+            <DialogDescription>Remplir les détails de la nouvelle formation</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Titre</Label>
+              <Input {...register('title')} />
+              {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label>Description courte</Label>
+              <Input {...register('shortDescription')} />
+            </div>
+            <div className="space-y-2">
+              <Label>Description complète</Label>
+              <Textarea {...register('fullDescription')} rows={3} />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Niveau</Label>
+                <Select onValueChange={(v) => setValue('level', v as FormationLevel)}>
+                  <SelectTrigger><SelectValue placeholder="Niveau" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DEBUTANT">Débutant</SelectItem>
+                    <SelectItem value="INTERMEDIAIRE">Intermédiaire</SelectItem>
+                    <SelectItem value="AVANCE">Avancé</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Durée (min)</Label>
+                <Input type="number" {...register('duration', { valueAsNumber: true })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Catégorie</Label>
+                <Select onValueChange={(v) => setValue('categoryId', v)}>
+                  <SelectTrigger><SelectValue placeholder="Catégorie" /></SelectTrigger>
+                  <SelectContent>
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
+              <Button type="submit" disabled={createFormation.isPending}>
+                {createFormation.isPending ? 'Enregistrement…' : 'Créer'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardContent className="pt-6">
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Rechercher des formations..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <Input
+              placeholder="Rechercher des formations…"
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Titre</TableHead>
-                <TableHead>Categorie</TableHead>
-                <TableHead>Duree</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredFormations.map((formation) => (
-                <TableRow key={formation.id}>
-                  <TableCell className="font-medium">{formation.title}</TableCell>
-                  <TableCell>{formation.categoryName}</TableCell>
-                  <TableCell>{formation.duration}h</TableCell>
-                  <TableCell>
-                    <Badge variant={formation.isPublished ? 'default' : 'secondary'}>
-                      {formation.isPublished ? 'Publie' : 'Brouillon'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Voir les modules</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(formation)}>Modifier</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(formation.id)} className="text-destructive">Supprimer</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+
+          {isLoading ? (
+            <div className="space-y-2">
+              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-8" />
+                  <TableHead>Titre</TableHead>
+                  <TableHead>Catégorie</TableHead>
+                  <TableHead>Niveau</TableHead>
+                  <TableHead>Durée</TableHead>
+                  <TableHead>Inscrits</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filtered.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      Aucune formation trouvée
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filtered.map((formation) => (
+                    <React.Fragment key={formation.id}>
+                      <TableRow
+                        className="cursor-pointer"
+                        onClick={() => setExpanded(expanded === formation.id ? null : formation.id)}
+                      >
+                        <TableCell>
+                          {expanded === formation.id
+                            ? <ChevronDown className="h-4 w-4" />
+                            : <ChevronRight className="h-4 w-4" />}
+                        </TableCell>
+                        <TableCell className="font-medium">{formation.title}</TableCell>
+                        <TableCell>{formation.category?.name ?? '—'}</TableCell>
+                        <TableCell>
+                          {formation.level ? (
+                            <Badge variant="outline">{LEVEL_LABELS[formation.level]}</Badge>
+                          ) : '—'}
+                        </TableCell>
+                        <TableCell>{formation.duration ? `${formation.duration} min` : '—'}</TableCell>
+                        <TableCell>{formation._count?.enrollments ?? 0}</TableCell>
+                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => setExpanded(formation.id)}>
+                                <Layers className="mr-2 h-4 w-4" /> Voir les modules
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleDelete(formation.id)}
+                                className="text-destructive"
+                                disabled={deleteFormation.isPending || (formation._count?.enrollments ?? 0) > 0}
+                              >
+                                Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                      {expanded === formation.id && (
+                        <TableRow>
+                          <TableCell colSpan={7} className="p-0">
+                            <FormationModules formation={formation} />
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -11,11 +11,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthStore } from '@/store';
+import { api } from '@/lib/api';
+import { AuthResponse } from '@/types';
 import { toast } from 'sonner';
 
 const loginSchema = z.object({
   email: z.string().email('Adresse email invalide'),
-  password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caracteres'),
+  password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -35,26 +37,13 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const mockUser = {
-        id: '1',
-        email: data.email,
-        firstName: 'Admin',
-        lastName: 'User',
-        role: 'SUPER_ADMIN' as const,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      setAuth(mockUser, 'mock-jwt-token');
-      toast.success('Bon retour !');
+      const res = await api.post<AuthResponse>('/auth/login', data);
+      setAuth(res.user, res.accessToken, res.refreshToken);
+      toast.success(`Bon retour, ${res.user.firstName} !`);
       router.push('/dashboard');
-    } catch {
-      toast.error('Identifiants invalides');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Identifiants invalides');
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +58,7 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-2xl">Win Academy Admin</CardTitle>
           <CardDescription>
-            Entrez vos identifiants pour acceder au panneau d administration
+            Entrez vos identifiants pour accéder au panneau d&apos;administration
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -92,7 +81,7 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="********"
+                placeholder="••••••••"
                 {...register('password')}
                 disabled={isLoading}
               />
@@ -101,7 +90,7 @@ export default function LoginPage() {
               )}
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Connexion...' : 'Se connecter'}
+              {isLoading ? 'Connexion…' : 'Se connecter'}
             </Button>
           </form>
         </CardContent>

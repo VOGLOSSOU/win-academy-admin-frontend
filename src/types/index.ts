@@ -1,6 +1,123 @@
-// User Types
-export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'INSTRUCTOR' | 'STUDENT';
+// ─── Pagination ──────────────────────────────────────────────────────────────
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}
 
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'INSTRUCTOR' | 'STUDENT';
+export type UserStatus = 'ACTIVE' | 'INACTIVE';
+
+export interface ApiUser {
+  id: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  sex: string;
+  communeId: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthResponse {
+  user: ApiUser;
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: string;
+}
+
+// ─── Category ─────────────────────────────────────────────────────────────────
+export interface ApiCategory {
+  id: string;
+  name: string;
+  description?: string | null;
+  image?: string | null;
+  ageMin: number;
+  ageMax: number;
+  createdAt: string;
+  formations?: ApiFormation[];
+}
+
+// ─── Formation ────────────────────────────────────────────────────────────────
+export type FormationLevel = 'DEBUTANT' | 'INTERMEDIAIRE' | 'AVANCE';
+
+export interface ApiFormation {
+  id: string;
+  title: string;
+  shortDescription?: string | null;
+  fullDescription?: string | null;
+  level?: FormationLevel;
+  duration?: number;
+  image?: string | null;
+  categoryId?: string;
+  createdAt: string;
+  category?: ApiCategory;
+  modules?: ApiModule[];
+  evaluation?: ApiEvaluation | null;
+  _count?: { enrollments: number };
+}
+
+// ─── Module ───────────────────────────────────────────────────────────────────
+export interface ApiModule {
+  id: string;
+  title: string;
+  description?: string | null;
+  order: number;
+  formationId: string;
+  createdAt: string;
+  contents?: ApiContent[];
+  formation?: ApiFormation;
+}
+
+// ─── Content ──────────────────────────────────────────────────────────────────
+export type ContentType = 'VIDEO' | 'PDF' | 'TEXT' | 'IMAGE';
+
+export interface ApiContent {
+  id: string;
+  type: ContentType;
+  title: string;
+  url?: string | null;
+  body?: string | null;
+  order: number;
+  moduleId: string;
+  createdAt: string;
+  module?: ApiModule;
+}
+
+// ─── Evaluation ───────────────────────────────────────────────────────────────
+export interface ApiEvaluation {
+  id: string;
+  formationId: string;
+  passingScore: number;
+  maxAttempts?: number | null;
+  timeLimit?: number | null;
+  formation?: ApiFormation;
+  questions?: ApiQuestion[];
+}
+
+// ─── Question & Answer ────────────────────────────────────────────────────────
+export interface ApiAnswer {
+  id: string;
+  questionId: string;
+  answerText: string;
+  isCorrect: boolean;
+  createdAt: string;
+}
+
+export interface ApiQuestion {
+  id: string;
+  evaluationId: string;
+  questionText: string;
+  createdAt: string;
+  answers?: ApiAnswer[];
+  evaluation?: ApiEvaluation;
+}
+
+// ─── Legacy types (pages non encore branchées) ───────────────────────────────
 export interface User {
   id: string;
   email: string;
@@ -11,13 +128,11 @@ export interface User {
   departmentId?: string;
   communeId?: string;
   phone?: string;
-  address?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-// Department Types
 export interface Department {
   id: string;
   name: string;
@@ -27,7 +142,6 @@ export interface Department {
   updatedAt: string;
 }
 
-// Commune Types
 export interface Commune {
   id: string;
   name: string;
@@ -38,84 +152,6 @@ export interface Commune {
   updatedAt: string;
 }
 
-// Category Types
-export interface Category {
-  id: string;
-  name: string;
-  description?: string;
-  parentId?: string;
-  parent?: Category;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Formation Types
-export interface FormationModule {
-  id: string;
-  formationId: string;
-  title: string;
-  description?: string;
-  order: number;
-  contents: FormationContent[];
-}
-
-export interface FormationContent {
-  id: string;
-  moduleId: string;
-  title: string;
-  type: 'VIDEO' | 'TEXT' | 'QUIZ' | 'FILE';
-  content: string;
-  duration?: number;
-  order: number;
-}
-
-export interface Formation {
-  id: string;
-  title: string;
-  description: string;
-  categoryId: string;
-  category?: Category;
-  instructorId: string;
-  instructor?: User;
-  price: number;
-  duration: number;
-  maxStudents: number;
-  isPublished: boolean;
-  modules: FormationModule[];
-  thumbnail?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Evaluation Types
-export interface Question {
-  id: string;
-  evaluationId: string;
-  text: string;
-  type: 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'TEXT';
-  options?: string[];
-  correctAnswer: string | string[];
-  points: number;
-  order: number;
-}
-
-export interface Evaluation {
-  id: string;
-  formationId: string;
-  formation?: Formation;
-  title: string;
-  description?: string;
-  duration: number;
-  passingScore: number;
-  questions: Question[];
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Enrollment Types
 export type EnrollmentStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CERTIFIED' | 'DROPPED';
 
 export interface Enrollment {
@@ -123,7 +159,6 @@ export interface Enrollment {
   userId: string;
   user?: User;
   formationId: string;
-  formation?: Formation;
   status: EnrollmentStatus;
   progress: number;
   enrolledAt: string;
@@ -131,26 +166,13 @@ export interface Enrollment {
   certificateId?: string;
 }
 
-// Certificate Types
 export interface Certificate {
   id: string;
   userId: string;
   user?: User;
   formationId: string;
-  formation?: Formation;
   certificateNumber: string;
   issuedAt: string;
   expiresAt?: string;
   verificationCode: string;
-}
-
-// Dashboard KPI Types
-export interface DashboardKPIs {
-  totalUsers: number;
-  totalFormations: number;
-  totalEnrollments: number;
-  totalCertificates: number;
-  usersByRole: Record<UserRole, number>;
-  enrollmentsByMonth: { month: string; count: number }[];
-  formationsByCategory: { category: string; count: number }[];
 }
