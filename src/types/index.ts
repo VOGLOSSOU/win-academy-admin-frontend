@@ -5,7 +5,7 @@ export interface PaginatedResponse<T> {
 }
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
-export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'INSTRUCTOR' | 'STUDENT';
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'INSTRUCTOR' | 'LEARNER';
 export type UserStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface ApiUser {
@@ -20,6 +20,12 @@ export interface ApiUser {
   status: UserStatus;
   createdAt: string;
   updatedAt: string;
+  commune?: {
+    id: string;
+    name: string;
+    departmentId: string;
+    department?: { id: string; name: string; code: string };
+  };
 }
 
 export interface AuthResponse {
@@ -117,62 +123,36 @@ export interface ApiQuestion {
   evaluation?: ApiEvaluation;
 }
 
-// ─── Legacy types (pages non encore branchées) ───────────────────────────────
-export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
-  avatar?: string;
-  departmentId?: string;
-  communeId?: string;
-  phone?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Department {
+// ─── Department ───────────────────────────────────────────────────────────────
+export interface ApiDepartment {
   id: string;
   name: string;
-  description?: string;
-  isActive: boolean;
+  code: string;
   createdAt: string;
   updatedAt: string;
+  communes?: ApiCommune[];
 }
 
-export interface Commune {
+// ─── Commune ──────────────────────────────────────────────────────────────────
+export interface ApiCommune {
   id: string;
   name: string;
   departmentId: string;
-  department?: Department;
-  isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  department?: ApiDepartment;
 }
 
-export type EnrollmentStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CERTIFIED' | 'DROPPED';
+// ─── Enrollment ───────────────────────────────────────────────────────────────
+export type EnrollmentStatus = 'IN_PROGRESS' | 'COMPLETED';
 
-export interface Enrollment {
+export interface ApiEnrollment {
   id: string;
   userId: string;
-  user?: User;
   formationId: string;
+  progressPercentage: number;
   status: EnrollmentStatus;
-  progress: number;
   enrolledAt: string;
-  completedAt?: string;
-  certificateId?: string;
-}
-
-export interface Certificate {
-  id: string;
-  userId: string;
-  user?: User;
-  formationId: string;
-  certificateNumber: string;
-  issuedAt: string;
-  expiresAt?: string;
-  verificationCode: string;
+  user?: Pick<ApiUser, 'id' | 'firstName' | 'lastName' | 'email' | 'role' | 'status'>;
+  formation?: Pick<ApiFormation, 'id' | 'title' | 'level' | 'duration'>;
 }

@@ -1,79 +1,46 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Eye, Download, FileCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Search, FileCheck, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
-
-interface Certificate {
-  id: string;
-  userName: string;
-  userEmail: string;
-  formationTitle: string;
-  certificateNumber: string;
-  issuedAt: string;
-  verificationCode: string;
-}
-
-const mockCertificates: Certificate[] = [
-  { id: '1', userName: 'John Doe', userEmail: 'john@email.com', formationTitle: 'Developpement Web', certificateNumber: 'WA-2024-001', issuedAt: '2024-01-20', verificationCode: 'ABC123' },
-  { id: '2', userName: 'Jane Smith', userEmail: 'jane@email.com', formationTitle: 'Design UI/UX', certificateNumber: 'WA-2024-002', issuedAt: '2024-02-25', verificationCode: 'DEF456' },
-  { id: '3', userName: 'Mike Wilson', userEmail: 'mike@email.com', formationTitle: 'Marketing Digital', certificateNumber: 'WA-2024-003', issuedAt: '2024-03-15', verificationCode: 'GHI789' },
-];
 
 export default function CertificatesPage() {
-  const [certificates, setCertificates] = useState<Certificate[]>(mockCertificates);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredCertificates = certificates.filter((cert) =>
-    cert.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    cert.certificateNumber.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleDownload = (cert: Certificate) => {
-    toast.success(`Telechargement du certificat ${cert.certificateNumber}`);
-  };
-
-  const handleVerify = (code: string) => {
-    toast.success(`Certificat verifie : ${code}`);
-  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Certificats</h1>
-          <p className="text-muted-foreground">Gerer et delivrer les certificats</p>
+          <p className="text-muted-foreground">Gérer et délivrer les certificats</p>
         </div>
-        <Button>
-          <FileCheck className="mr-2 h-4 w-4" /> Delivrer un certificat
-        </Button>
       </div>
+
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertTitle>Fonctionnalité à venir</AlertTitle>
+        <AlertDescription>
+          Les endpoints API pour les certificats ne sont pas encore documentés.
+          Cette page sera connectée dès que les routes seront disponibles.
+        </AlertDescription>
+      </Alert>
 
       <Card>
         <CardContent className="pt-6">
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Rechercher des certificats..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <Input
+              placeholder="Rechercher des certificats…"
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              disabled
+            />
           </div>
           <Table>
             <TableHeader>
@@ -81,46 +48,20 @@ export default function CertificatesPage() {
                 <TableHead>Certificat #</TableHead>
                 <TableHead>Apprenant</TableHead>
                 <TableHead>Formation</TableHead>
-                <TableHead>Delivre le</TableHead>
-                <TableHead>Verification</TableHead>
+                <TableHead>Délivré le</TableHead>
+                <TableHead>Vérification</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCertificates.map((cert) => (
-                <TableRow key={cert.id}>
-                  <TableCell className="font-medium">{cert.certificateNumber}</TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{cert.userName}</div>
-                      <div className="text-sm text-muted-foreground">{cert.userEmail}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{cert.formationTitle}</TableCell>
-                  <TableCell>{cert.issuedAt}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{cert.verificationCode}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Voir le certificat</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDownload(cert)}>
-                          <Download className="mr-2 h-4 w-4" /> Telecharger PDF
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleVerify(cert.verificationCode)}>
-                          Verifier
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
+                  <div className="flex flex-col items-center gap-2">
+                    <FileCheck className="h-8 w-8 text-muted-foreground/50" />
+                    <p>Aucun certificat disponible pour le moment</p>
+                  </div>
+                </TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </CardContent>

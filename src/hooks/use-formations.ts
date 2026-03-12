@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { ApiFormation, ApiModule, ApiContent, PaginatedResponse, FormationLevel, ContentType } from '@/types';
 
@@ -18,6 +18,34 @@ export function useFormation(id: string) {
     queryFn: () => api.get<ApiFormation>(`/formations/${id}`),
     enabled: !!id,
   });
+}
+
+/**
+ * Fetches each formation by ID (in parallel) to get the `evaluation` field,
+ * which is absent from the list endpoint GET /formations.
+ */
+export function useFormationsWithEvaluations(page = 1, limit = 100) {
+  const listQuery = useQuery({
+    queryKey: [QUERY_KEY, page, limit],
+    queryFn: () => api.get<PaginatedResponse<ApiFormation>>(`/formations?page=${page}&limit=${limit}`),
+  });
+
+  const ids = listQuery.data?.data.map((f) => f.id) ?? [];
+
+  const detailQueries = useQueries({
+    queries: ids.map((id) => ({
+      queryKey: [QUERY_KEY, id],
+      queryFn: () => api.get<ApiFormation>(`/formations/${id}`),
+      enabled: ids.length > 0,
+    })),
+  });
+
+  const isLoading = listQuery.isLoading || detailQueries.some((q) => q.isLoading);
+  const formations = detailQueries
+    .map((q) => q.data)
+    .filter((f): f is ApiFormation => !!f);
+
+  return { formations, isLoading, meta: listQuery.data?.meta };
 }
 
 export function useCreateFormation() {

@@ -1,8 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { ApiEvaluation, ApiQuestion } from '@/types';
+import { ApiEvaluation, ApiQuestion, PaginatedResponse } from '@/types';
 
 const QUERY_KEY = 'evaluations';
+
+export function useEvaluations(page = 1, limit = 50) {
+  return useQuery({
+    queryKey: [QUERY_KEY, page, limit],
+    queryFn: () => api.get<PaginatedResponse<ApiEvaluation>>(`/evaluations?page=${page}&limit=${limit}`),
+  });
+}
 
 export function useEvaluation(id: string) {
   return useQuery({

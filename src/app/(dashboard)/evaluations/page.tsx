@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Search, MoreHorizontal, ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
+import { Plus, Search, ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,21 +17,17 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
-  DropdownMenuSeparator, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import {
-  useEvaluation, useCreateEvaluation,
+  useEvaluations, useEvaluation, useCreateEvaluation,
   useCreateQuestion, useUpdateQuestion, useDeleteQuestion,
 } from '@/hooks';
-import { useFormations } from '@/hooks';
-import { ApiEvaluation, ApiFormation } from '@/types';
+import { useFormations } from '@/hooks/use-formations';
+import { ApiEvaluation } from '@/types';
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 const evalSchema = z.object({
@@ -56,14 +52,12 @@ type EvalFormValues = z.infer<typeof evalSchema>;
 type QuestionFormValues = z.infer<typeof questionSchema>;
 
 // ─── Sous-composant : Détail d'une évaluation ─────────────────────────────────
-function EvaluationDetail({ evalId }: { evalId: string }) {
-  const { data: evaluation, isLoading } = useEvaluation(evalId);
+function EvaluationDetail({ evalId, evaluation }: { evalId: string; evaluation: ApiEvaluation }) {
+  const { data: freshEval, isLoading } = useEvaluation(evalId);
   const createQuestion = useCreateQuestion();
-  const updateQuestion = useUpdateQuestion();
   const deleteQuestion = useDeleteQuestion();
 
   const [questionDialog, setQuestionDialog] = useState(false);
-  const [editingQuestion, setEditingQuestion] = useState<string | null>(null);
 
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm<QuestionFormValues>({
     resolver: zodResolver(questionSchema),
@@ -81,7 +75,6 @@ function EvaluationDetail({ evalId }: { evalId: string }) {
   const { fields, append, remove } = useFieldArray({ control, name: 'answers' });
 
   const openAddQuestion = () => {
-    setEditingQuestion(null);
     reset({
       questionText: '',
       answers: [
@@ -96,81 +89,75 @@ function EvaluationDetail({ evalId }: { evalId: string }) {
 
   const onSubmitQuestion = async (data: QuestionFormValues) => {
     try {
-      if (editingQuestion) {
-        await updateQuestion.mutateAsync({
-          id: editingQuestion,
-          evaluationId: evalId,
-          questionText: data.questionText,
-        });
-        toast.success('Question modifiée');
-      } else {
-        await createQuestion.mutateAsync({ evaluationId: evalId, ...data });
-        toast.success('Question ajoutée');
-      }
+      await createQuestion.mutateAsync({ evaluationId: evalId, ...data });
+      toast.success('Question ajoutée');
       setQuestionDialog(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur');
     }
   };
 
-  if (isLoading) return <div className="p-4"><Skeleton className="h-32 w-full" /></div>;
-  if (!evaluation) return null;
-
-  const questions = evaluation.questions ?? [];
+  // Use freshEval when available, fall back to list data
+  const evalData = freshEval ?? evaluation;
+  const questions = evalData.questions ?? [];
 
   return (
     <div className="border-t bg-muted/30 p-4 space-y-3">
       <div className="grid grid-cols-3 gap-4 text-sm mb-2">
         <div className="text-center">
           <p className="text-muted-foreground">Score de passage</p>
-          <p className="font-bold text-lg">{evaluation.passingScore}%</p>
+          <p className="font-bold text-lg">{evalData.passingScore}%</p>
         </div>
         <div className="text-center">
           <p className="text-muted-foreground">Tentatives max</p>
-          <p className="font-bold text-lg">{evaluation.maxAttempts ?? '∞'}</p>
+          <p className="font-bold text-lg">{evalData.maxAttempts ?? '∞'}</p>
         </div>
         <div className="text-center">
           <p className="text-muted-foreground">Durée limite</p>
-          <p className="font-bold text-lg">{evaluation.timeLimit ? `${evaluation.timeLimit} min` : '—'}</p>
+          <p className="font-bold text-lg">{evalData.timeLimit ? `${evalData.timeLimit} min` : '—'}</p>
         </div>
       </div>
 
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-muted-foreground">
-          {questions.length} question(s)
+          {isLoading ? '…' : questions.length} question(s)
         </p>
         <Button size="sm" variant="outline" onClick={openAddQuestion}>
           <Plus className="h-3 w-3 mr-1" /> Question
         </Button>
       </div>
 
-      {questions.map((q, qIdx) => (
-        <div key={q.id} className="rounded-md border bg-background p-3 space-y-2">
-          <div className="flex items-start justify-between gap-2">
-            <p className="font-medium text-sm">{qIdx + 1}. {q.questionText}</p>
-            <Button
-              size="sm" variant="ghost" className="text-destructive shrink-0"
-              onClick={async () => {
-                try {
-                  await deleteQuestion.mutateAsync({ id: q.id, evaluationId: evalId });
-                  toast.success('Question supprimée');
-                } catch (err) { toast.error(err instanceof Error ? err.message : 'Erreur'); }
-              }}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+      {isLoading ? (
+        <Skeleton className="h-20 w-full" />
+      ) : (
+        questions.map((q, qIdx) => (
+          <div key={q.id} className="rounded-md border bg-background p-3 space-y-2">
+            <div className="flex items-start justify-between gap-2">
+              <p className="font-medium text-sm">{qIdx + 1}. {q.questionText}</p>
+              <Button
+                size="sm" variant="ghost" className="text-destructive shrink-0"
+                onClick={async () => {
+                  try {
+                    await deleteQuestion.mutateAsync({ id: q.id, evaluationId: evalId });
+                    toast.success('Question supprimée');
+                  } catch (err) { toast.error(err instanceof Error ? err.message : 'Erreur'); }
+                }}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <div className="pl-3 space-y-1">
+              {(q.answers ?? []).map((a) => (
+                <div key={a.id} className="flex items-center gap-2 text-sm">
+                  <span className={a.isCorrect ? 'text-green-600 font-medium' : 'text-muted-foreground'}>
+                    {a.isCorrect ? '✓' : '○'} {a.answerText}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="pl-3 space-y-1">
-            {(q.answers ?? []).map((a) => (
-              <div key={a.id} className="flex items-center gap-2 text-sm">
-                <span className={a.isCorrect ? 'text-green-600 font-medium' : 'text-muted-foreground'}>
-                  {a.isCorrect ? '✓' : '○'} {a.answerText}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+        ))
+      )}
 
       {/* Dialog ajout question */}
       <Dialog open={questionDialog} onOpenChange={setQuestionDialog}>
@@ -242,25 +229,28 @@ function EvaluationDetail({ evalId }: { evalId: string }) {
 
 // ─── Page principale ──────────────────────────────────────────────────────────
 export default function EvaluationsPage() {
-  const { data: formationsData, isLoading: loadingFormations } = useFormations(1, 100);
+  const { data: evaluationsData, isLoading: loadingEvals } = useEvaluations(1, 100);
+  const { data: formationsData, isLoading: loadingFormations } = useFormations(1, 200);
   const createEvaluation = useCreateEvaluation();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [expanded, setExpanded] = useState<string | null>(null); // evalId
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<EvalFormValues>({
     resolver: zodResolver(evalSchema),
     defaultValues: { passingScore: 70 },
   });
 
-  // Formations qui ont déjà une évaluation
+  const evaluations = evaluationsData?.data ?? [];
   const formations = formationsData?.data ?? [];
-  const formationsWithEval = formations.filter((f) => f.evaluation);
-  const formationsWithoutEval = formations.filter((f) => !f.evaluation);
 
-  const filtered = formationsWithEval.filter((f) =>
-    f.title.toLowerCase().includes(searchQuery.toLowerCase())
+  // Formations that don't already have an evaluation
+  const evaluatedFormationIds = new Set(evaluations.map((e) => e.formationId));
+  const formationsWithoutEval = formations.filter((f) => !evaluatedFormationIds.has(f.id));
+
+  const filtered = evaluations.filter((e) =>
+    (e.formation?.title ?? '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const onSubmit = async (data: EvalFormValues) => {
@@ -274,6 +264,8 @@ export default function EvaluationsPage() {
     }
   };
 
+  const isLoading = loadingEvals || loadingFormations;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -282,7 +274,7 @@ export default function EvaluationsPage() {
           <p className="text-muted-foreground">Gérer les quiz et questions par formation</p>
         </div>
         <Button onClick={() => { reset({ passingScore: 70 }); setIsDialogOpen(true); }}
-          disabled={formationsWithoutEval.length === 0}>
+          disabled={isLoading || formationsWithoutEval.length === 0}>
           <Plus className="mr-2 h-4 w-4" /> Créer une évaluation
         </Button>
       </div>
@@ -344,7 +336,7 @@ export default function EvaluationsPage() {
             />
           </div>
 
-          {loadingFormations ? (
+          {loadingEvals ? (
             <div className="space-y-2">
               {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
             </div>
@@ -368,31 +360,29 @@ export default function EvaluationsPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filtered.map((formation) => {
-                    const evalData = formation.evaluation!;
-                    const evalId = evalData.id;
-                    const isOpen = expanded === evalId;
+                  filtered.map((evaluation) => {
+                    const isOpen = expanded === evaluation.id;
                     return (
-                      <React.Fragment key={formation.id}>
+                      <React.Fragment key={evaluation.id}>
                         <TableRow
                           className="cursor-pointer"
-                          onClick={() => setExpanded(isOpen ? null : evalId)}
+                          onClick={() => setExpanded(isOpen ? null : evaluation.id)}
                         >
                           <TableCell>
                             {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                           </TableCell>
-                          <TableCell className="font-medium">{formation.title}</TableCell>
+                          <TableCell className="font-medium">{evaluation.formation?.title ?? evaluation.formationId}</TableCell>
                           <TableCell>
-                            <Badge variant="outline">{evalData.passingScore}%</Badge>
+                            <Badge variant="outline">{evaluation.passingScore}%</Badge>
                           </TableCell>
-                          <TableCell>{evalData.maxAttempts ?? '∞'}</TableCell>
-                          <TableCell>{evalData.timeLimit ? `${evalData.timeLimit} min` : '—'}</TableCell>
-                          <TableCell>—</TableCell>
+                          <TableCell>{evaluation.maxAttempts ?? '∞'}</TableCell>
+                          <TableCell>{evaluation.timeLimit ? `${evaluation.timeLimit} min` : '—'}</TableCell>
+                          <TableCell>{(evaluation.questions ?? []).length}</TableCell>
                         </TableRow>
                         {isOpen && (
                           <TableRow>
                             <TableCell colSpan={6} className="p-0">
-                              <EvaluationDetail evalId={evalId} />
+                              <EvaluationDetail evalId={evaluation.id} evaluation={evaluation} />
                             </TableCell>
                           </TableRow>
                         )}
